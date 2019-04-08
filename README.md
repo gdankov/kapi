@@ -11,6 +11,14 @@ replicate the CF v3 APIs with Kubernetes CRDs.
 - Experiment with whether it's better to do a CLI using k8s apis or with a wrapper around CRDs
 - Determine what an "MVP" would look like for this to avoid boiling the ocean
 
+# Non-Goals
+
+- Actual production code. This is a dirty rotten spike.
+
+# What might success look like?
+
+- end-to-end cf v3-push via cli (potentially wrapping kubectl, against CAPI api wrapper around CRDs), resulting in working statefulsets (probably via eirini)
+
 # How does/would KAPI differ from Knative/StatefulSets/Deployments
 
 KAPI apis are *PaaS* APIs. This means they are high-level (packages, droplets,
