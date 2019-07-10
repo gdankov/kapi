@@ -1,0 +1,7 @@
+apiVersion: "kapi.cf.org/v1alpha1"
+kind: LRP
+metadata:
+  name: lrp-dora-fedora
+spec:
+  request:
+    app_guid: "guido"
