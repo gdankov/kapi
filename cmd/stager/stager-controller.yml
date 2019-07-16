@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stager-controller
+  labels:
+    name: stager-controller
+  namespace: eirini
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: stager-controller
+  template:
+    metadata:
+      labels:
+        name: stager-controller
+    spec:
+      serviceAccountName: kapi-eirini-admin
+      containers:
+      - name: hello-my-dudes
+        image: eirini/kapi:initial
+        imagePullPolicy: Always
