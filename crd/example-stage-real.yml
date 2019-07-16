@@ -1,0 +1,55 @@
+apiVersion: "kapi.cf.org/v1alpha1"
+kind: Staging
+metadata:
+  name: dora-fedora
+spec:
+  app_guid: "4b975f38-5562-45f9-a596-63ea0e7573ac"
+  completion_callback: "https://internal_user:2SAzKRDd4gF6mNlYxMm7IleaQIDu4s9ozN9f315L6XSH0OJz4j126FWEn1rc2Xzm@api.scf.svc.cluster.local:9023/internal/v3/staging/e84501ec-093f-4067-92f4-49ba7d0130f0/build_completed?start=true"
+  state: NotStarted
+  environment:
+  - name: "http_proxy"
+    value: ""
+  - name: "VCAP_SERVICES"
+    value: "{}"
+  - name: "STAGING_GUID"
+    value: "e84501ec-093f-4067-92f4-49ba7d0130f0"
+  - name: "COMPLETION_CALLBACK"
+    value: "https://internal_user:2SAzKRDd4gF6mNlYxMm7IleaQIDu4s9ozN9f315L6XSH0OJz4j126FWEn1rc2Xzm@api.scf.svc.cluster.local:9023/internal/v3/staging/e84501ec-093f-4067-92f4-49ba7d0130f0/build_completed?start=true"
+  - name: "EIRINI_ADDRESS"
+    value: "http://eirini-opi.scf.svc.cluster.local:8085"
+  - name: "DROPLET_UPLOAD_URL"
+    value: "https://cc-uploader-cc-uploader.scf.svc.cluster.local:9091/v1/droplet/e84501ec-093f-4067-92f4-49ba7d0130f0?cc-droplet-upload-uri=https://api.scf.svc.cluster.local:9023/internal/v4/droplets/e84501ec-093f-4067-92f4-49ba7d0130f0/upload"
+  - name: "CF_STACK"
+    value: "cflinuxfs3"
+  - name: "LANG"
+    value: "en_US.UTF-8"
+  - name: "HTTP_PROXY"
+    value: ""
+  - name: "NO_PROXY"
+    value: ""
+  - name: "MEMORY_LIMIT"
+    value: ""
+  - name: "https_proxy"
+    value: ""
+  - name: "HTTPS_PROXY"
+    value: ""
+  - name: "no_proxy"
+    value: ""
+  - name: "VCAP_APPLICATION"
+    value: >
+        {"cf_api":"https://api.158.176.93.40.nip.io","limits":{"fds":16384,"mem":1024,"disk":4096},"application_name":"dora","application_uris":["dora.158.176.93.40.nip.io"],"name":"dora","space_name":"s","space_id":"46787966-a4fc-4037-937f-87549e346df3","uris":["dora.158.176.93.40.nip.io"],"users":null,"application_id":"4b975f38-5562-45f9-a596-63ea0e7573ac","version":"4985727d-f079-4404-b029-2c7d67509e4c","application_version":"4985727d-f079-4404-b029-2c7d67509e4c"}
+  - name: "DOWNLOAD_URL"
+    value: "https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-packages/f2/2c/f22c0edc-f8d2-409c-8006-e247bdfa60e4?md5=rvbKLIAN7Yk-IC5MshVNsw&expires=1563265024"
+  - name: "BUILDPACKS"
+    value: > 
+        [{"name":"staticfile_buildpack","key":"5a844fc0-a3d9-4357-bf42-0fa27b0b8ce5_ce8efc895a7c1dcd213dfc6df19e2cb5aea3f3f33e1eb5df031d551379199784","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/5a/84/5a844fc0-a3d9-4357-bf42-0fa27b0b8ce5_ce8efc895a7c1dcd213dfc6df19e2cb5aea3f3f33e1eb5df031d551379199784?md5=4D3NQh-TQXCYGDITCzFFSw\u0026expires=1563265024","skip_detect":false},{"name":"nginx_buildpack","key":"7f7ed79d-5127-4d18-84fe-813059ff3cf0_7303ebf00d191f9feadaf66bff940a745794eb68b26ec23c7d745ace10da7245","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/7f/7e/7f7ed79d-5127-4d18-84fe-813059ff3cf0_7303ebf00d191f9feadaf66bff940a745794eb68b26ec23c7d745ace10da7245?md5=ew5ZFH_F1lwccJJHJqsbOg\u0026expires=1563265024","skip_detect":false},{"name":"java_buildpack","key":"06683a50-e3c1-4c5e-b67d-2a16d1307e09_b6d0d4f3c950af7a6250023a5157300081c35f18dcacb92c602375066ff27334","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/06/68/06683a50-e3c1-4c5e-b67d-2a16d1307e09_b6d0d4f3c950af7a6250023a5157300081c35f18dcacb92c602375066ff27334?md5=TYjjTVSrwvtCk3YgMyfXfg\u0026expires=1563265024","skip_detect":false},{"name":"ruby_buildpack","key":"c269bfed-869d-4011-bbc6-ab58594fa7ac_5a108a0181bbbe2a75302067ed583f135f81348c8fe15cff0dd2298fc59a2a79","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/c2/69/c269bfed-869d-4011-bbc6-ab58594fa7ac_5a108a0181bbbe2a75302067ed583f135f81348c8fe15cff0dd2298fc59a2a79?md5=oku6CCcb9okVLG_uFNwAVA\u0026expires=1563265024","skip_detect":false},{"name":"nodejs_buildpack","key":"d48f92ba-f010-421e-ad2d-b6911a4edc7e_bda39814bff2dc9d518f3008ee5bcd76df61cd38a329730ee99cdfe380b30160","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/d4/8f/d48f92ba-f010-421e-ad2d-b6911a4edc7e_bda39814bff2dc9d518f3008ee5bcd76df61cd38a329730ee99cdfe380b30160?md5=y4fNMSls0FvaynIUqlV7CA\u0026expires=1563265024","skip_detect":false},{"name":"go_buildpack","key":"bf839bac-a037-4391-956a-f96b0a8f71e1_e0ee994d0df25d27973405604fdd4d1858abcb8b68020af4d5af2aaafdddab2b","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/bf/83/bf839bac-a037-4391-956a-f96b0a8f71e1_e0ee994d0df25d27973405604fdd4d1858abcb8b68020af4d5af2aaafdddab2b?md5=x3OBX7ErKDrRSzDDvws0zw\u0026expires=1563265024","skip_detect":false},{"name":"python_buildpack","key":"f4f5cd09-b2f5-4fe6-9a82-96f5a8c6ad3c_51b6b2db3e2bf58bc1503c1f72ecbd8f5656871d007a0d7f11c6c0da412fb42e","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/f4/f5/f4f5cd09-b2f5-4fe6-9a82-96f5a8c6ad3c_51b6b2db3e2bf58bc1503c1f72ecbd8f5656871d007a0d7f11c6c0da412fb42e?md5=doB-WCKP4aNAij9gDGe8Sw\u0026expires=1563265024","skip_detect":false},{"name":"php_buildpack","key":"1811f8d3-8f3d-4548-add6-9305dd76506f_cf9d79fc522f481ae58b8e4c5af2191eab054599a3881d4bff87a5733a811d8c","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/18/11/1811f8d3-8f3d-4548-add6-9305dd76506f_cf9d79fc522f481ae58b8e4c5af2191eab054599a3881d4bff87a5733a811d8c?md5=U7LWNQyYAUCr6-Y7lbR1fQ\u0026expires=1563265024","skip_detect":false},{"name":"binary_buildpack","key":"5dcdb24b-ba8c-403a-a3bd-8c259d7eab3a_68217820104e1fade4b98e3619b8703f269478c3f9bc391579191214550bc3e4","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/5d/cd/5dcdb24b-ba8c-403a-a3bd-8c259d7eab3a_68217820104e1fade4b98e3619b8703f269478c3f9bc391579191214550bc3e4?md5=-kCX7DILH_J39Nv30ha33w\u0026expires=1563265024","skip_detect":false},{"name":"dotnet-core_buildpack","key":"7c6d1431-8a22-4496-bfd5-767f78c21379_5649ff15db86a0d04705c4e521937c7f3a193c4831a6a99cf922aa1981c09fee","url":"https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/7c/6d/7c6d1431-8a22-4496-bfd5-767f78c21379_5649ff15db86a0d04705c4e521937c7f3a193c4831a6a99cf922aa1981c09fee?md5=An_LnVM0bQJazBoxjVZmaA\u0026expires=1563265024","skip_detect":false}]
+  - name: "APP_ID"
+    value: "4b975f38-5562-45f9-a596-63ea0e7573ac"
+  lifecycle_data:
+    app_bits_download_uri: "https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-packages/f2/2c/f22c0edc-f8d2-409c-8006-e247bdfa60e4?md5=rvbKLIAN7Yk-IC5MshVNsw&expires=1563265024"
+    droplet_upload_uri: "https://cc-uploader-cc-uploader.scf.svc.cluster.local:9091/v1/droplet/e84501ec-093f-4067-92f4-49ba7d0130f0?cc-droplet-upload-uri=https://api.scf.svc.cluster.local:9023/internal/v4/droplets/e84501ec-093f-4067-92f4-49ba7d0130f0/upload"
+    buildpacks:
+    - name: "ruby_buildpack"
+      key: "5a844fc0-a3d9-4357-bf42-0fa27b0b8ce5_ce8efc895a7c1dcd213dfc6df19e2cb5aea3f3f33e1eb5df031d551379199784"
+      url: "https://blobstore-blobstore.scf.svc.cluster.local:4443/read/cc-buildpacks/5a/84/5a844fc0-a3d9-4357-bf42-0fa27b0b8ce5_ce8efc895a7c1dcd213dfc6df19e2cb5aea3f3f33e1eb5df031d551379199784?md5=4D3NQh-TQXCYGDITCzFFSw&expires=1563265024"
+      skip_detect: false

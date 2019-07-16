@@ -4,6 +4,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	NotStartedState = "NotStarted"
+	StartedState    = "Started"
+)
+
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -16,11 +21,33 @@ type Staging struct {
 }
 
 type StagingSpec struct {
-	AppGUID string `json:"app_guid"`
+	AppGUID            string        `json:"app_guid"`
+	CompletionCallback string        `json:"completion_callback"`
+	Environment        []EnvVar      `json:"environment"`
+	LifecycleData      LifecycleData `json:"lifecycle_data"`
+	State              string        `json:"state"`
+}
+
+type EnvVar struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type LifecycleData struct {
+	AppBitsDownloadURI string      `json:"app_bits_download_uri"`
+	DropletUploadURI   string      `json:"droplet_upload_uri"`
+	Buildpacks         []Buildpack `json:"buildpacks"`
+}
+
+type Buildpack struct {
+	Name       string `json:"name"`
+	Key        string `json:"key"`
+	URL        string `json:"url"`
+	SkipDetect bool   `json:"skip_detect"`
 }
 
 type StagingStatus struct {
-	AvailableReplicas int32 `json:"availableReplicas"`
+	State string `json:"state"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -1,15 +1,20 @@
 package staging
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
+	kapiv1alpha1 "github.com/cloudfoundry-community/kapi/pkg/apis/kapi/v1alpha1"
 	clientset "github.com/cloudfoundry-community/kapi/pkg/generated/clientset/versioned"
 	samplescheme "github.com/cloudfoundry-community/kapi/pkg/generated/clientset/versioned/scheme"
 	informers "github.com/cloudfoundry-community/kapi/pkg/generated/informers/externalversions/kapi/v1alpha1"
 	listers "github.com/cloudfoundry-community/kapi/pkg/generated/listers/kapi/v1alpha1"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -164,15 +169,44 @@ func (c *StagerController) syncHandler(key string) error {
 
 	staging, err := c.stagersLister.Stagings(namespace).Get(name)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", key))
 			return nil
 		}
 
 		return err
 	}
+	fmt.Println("Staging state: ", staging.Spec.State)
+	fmt.Sprintf("Staging is: %+v", staging)
+	if staging.Spec.State != kapiv1alpha1.NotStartedState {
+		fmt.Println("Staging job already started")
+		return nil
+	}
+	fmt.Println("Starting staging task")
+	url := "http://eirini-opi.scf.svc.cluster.local:8085/stage/some-guid"
 
-	fmt.Printf("Found obj: %+v\n", staging)
+	spec := staging.Spec
+	b, err := json.Marshal(spec)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal spec")
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
+	if err != nil {
+		return errors.Wrap(err, "failed to create the post request")
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to execute the post request")
+	}
+	fmt.Sprintf("Response from eirini: %+v\n", resp)
 
-	return nil
+	staging.Spec.State = kapiv1alpha1.StartedState
+
+	_, err = c.kapiClientset.SamplecontrollerV1alpha1().Stagings(namespace).Update(staging)
+	if err != nil {
+		fmt.Println("Failed to update status", err)
+	}
+
+	return err
 }

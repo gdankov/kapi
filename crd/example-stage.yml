@@ -3,23 +3,25 @@ kind: Staging
 metadata:
   name: dora-fedora
 spec:
-  request:
-    app_guid: "guido"
-    completion_callback: "https://completion.callback.io"
-    environment:
-    - name: "ENV_1"
-      value: "value of env1"
-    - name: "ENV_2"
-      value: "value of env2"
-    lifecycle_data:
-      app_bits_download_uri: "https://app_bits_download_uri.io"
-      droplet_upload_uri: "droplet_upload_uri"
-      buildpacks:
-      - name: "ruby_buildpack"
-        key: "major_key_alert"
-        url: "https://ruby.com/how-to-uninstall"
-        skip_detect: true
-      - name: "go_buildpack"
-        key: "major_key_alert"
-        url: "https://golang.com"
-        skip_detect: true
+  app_guid: "guido"
+  completion_callback: "https://completion.callback.io"
+  state: NotStarted
+  environment:
+  - name: "ENV_1"
+    value: "value of env1"
+  - name: "ENV_2"
+    value: "value of env2"
+  lifecycle_data:
+    app_bits_download_uri: "https://app_bits_download_uri.io"
+    droplet_upload_uri: "droplet_upload_uri"
+    buildpacks:
+    - name: "ruby_buildpack"
+      key: "major_key_alert"
+      url: "https://ruby.com/how-to-uninstall"
+      skip_detect: true
+    - name: "go_buildpack"
+      key: "major_key_alert"
+      url: "https://golang.com"
+      skip_detect: true
+status:
+  state: NotStarted
