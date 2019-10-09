@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stager-controller
+  labels:
+    name: stager-controller
+  namespace: kapini
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: stager-controller
+  template:
+    metadata:
+      labels:
+        name: stager-controller
+    spec:
+      serviceAccountName: kapi-eirini-admin
+      volumes:
+      - name: cf-secrets
+        secret:
+          secretName: secrets-2.16.4-2
+          items:
+          - key: eirini-client-crt
+            path: eirini.crt
+          - key: eirini-client-crt-key
+            path: eirini.key
+          - key: internal-ca-cert
+            path: ca.crt
+      containers:
+      - name: hello-my-dudes
+        image: eirini/kapi
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: cf-secrets
+          mountPath: /workspace/jobs/st8ger_controller

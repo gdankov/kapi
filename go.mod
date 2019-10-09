@@ -3,7 +3,9 @@ module github.com/cloudfoundry-community/kapi
 go 1.12
 
 require (
+	code.cloudfoundry.org/eirini v0.0.0-20191003133837-d1f227bf250a
 	github.com/imdario/mergo v0.3.7 // indirect
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pkg/errors v0.8.1
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect

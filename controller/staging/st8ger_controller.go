@@ -2,9 +2,13 @@ package staging
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	kapiv1alpha1 "github.com/cloudfoundry-community/kapi/pkg/apis/kapi/v1alpha1"
@@ -177,29 +181,43 @@ func (c *StagerController) syncHandler(key string) error {
 		return err
 	}
 	fmt.Println("Staging state: ", staging.Spec.State)
-	fmt.Sprintf("Staging is: %+v", staging)
 	if staging.Spec.State != kapiv1alpha1.NotStartedState {
 		fmt.Println("Staging job already started")
 		return nil
 	}
 	fmt.Println("Starting staging task")
-	url := "http://eirini-opi.scf.svc.cluster.local:8085/stage/some-guid"
 
 	spec := staging.Spec
 	b, err := json.Marshal(spec)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal spec")
 	}
+
+	fmt.Printf("STAGING SPEC LOOKS LIKE THIS: %+v", spec)
+	url := fmt.Sprintf("https://eirini-opi.scf.svc.cluster.local:8085/stage/%s", spec.AppGUID)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
 	if err != nil {
 		return errors.Wrap(err, "failed to create the post request")
 	}
-	client := &http.Client{}
+
+	client, err := createTLSHTTPClient(
+		[]CertPaths{
+			{
+				Crt: "/workspace/jobs/st8ger_controller/eirini.crt",
+				Key: "/workspace/jobs/st8ger_controller/eirini.key",
+				Ca:  "/workspace/jobs/st8ger_controller/ca.crt",
+			},
+		},
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to create https client")
+	}
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute the post request")
 	}
-	fmt.Sprintf("Response from eirini: %+v\n", resp)
+	fmt.Printf("WE GOT A RESPONSE: %+v", resp)
 
 	staging.Spec.State = kapiv1alpha1.StartedState
 
@@ -209,4 +227,35 @@ func (c *StagerController) syncHandler(key string) error {
 	}
 
 	return err
+}
+
+type CertPaths struct {
+	Crt, Key, Ca string
+}
+
+func createTLSHTTPClient(certPaths []CertPaths) (*http.Client, error) {
+	pool := x509.NewCertPool()
+	certs := []tls.Certificate{}
+	for _, c := range certPaths {
+		cert, err := tls.LoadX509KeyPair(c.Crt, c.Key)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not load cert")
+		}
+		certs = append(certs, cert)
+
+		cacert, err := ioutil.ReadFile(filepath.Clean(c.Ca))
+		if err != nil {
+			return nil, err
+		}
+		if ok := pool.AppendCertsFromPEM(cacert); !ok {
+			return nil, errors.New("failed to append cert to cert pool")
+		}
+	}
+
+	tlsConf := &tls.Config{
+		Certificates: certs,
+		RootCAs:      pool,
+	}
+
+	return &http.Client{Transport: &http.Transport{TLSClientConfig: tlsConf}}, nil
 }

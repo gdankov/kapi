@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -17,7 +19,7 @@ type Staging struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   StagingSpec   `json:"spec"`
-	Status StagingStatus `json:"status"`
+	Status StagingStatus `json:"status,omitempty"`
 }
 
 type StagingSpec struct {
@@ -47,7 +49,7 @@ type Buildpack struct {
 }
 
 type StagingStatus struct {
-	State string `json:"state"`
+	State string `json:"state,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -71,11 +73,51 @@ type LRP struct {
 }
 
 type LRPSpec struct {
-	AppGUID string `json:"app_guid"`
+	GUID                    string                      `json:"guid"`
+	Version                 string                      `json:"version"`
+	ProcessGUID             string                      `json:"process_guid"`
+	Ports                   []int32                     `json:"ports"`
+	Routes                  map[string]*json.RawMessage `json:"routes"`
+	Environment             map[string]string           `json:"environment"`
+	NumInstances            int                         `json:"instances"`
+	LastUpdated             string                      `json:"last_updated"`
+	HealthCheckType         string                      `json:"health_check_type"`
+	HealthCheckHTTPEndpoint string                      `json:"health_check_http_endpoint"`
+	HealthCheckTimeoutMs    uint                        `json:"health_check_timeout_ms"`
+	MemoryMB                int64                       `json:"memory_mb"`
+	CPUWeight               uint8                       `json:"cpu_weight"`
+	VolumeMounts            []VolumeMount               `json:"volume_mounts"`
+	Lifecycle               Lifecycle                   `json:"lifecycle"`
+	DropletHash             string                      `json:"droplet_hash"`
+	DropletGUID             string                      `json:"droplet_guid"`
+	StartCommand            string                      `json:"start_command"`
+	State                   string                      `json:"state"`
+}
+
+type Lifecycle struct {
+	DockerLifecycle    *DockerLifecycle    `json:"docker_lifecycle"`
+	BuildpackLifecycle *BuildpackLifecycle `json:"buildpack_lifecycle"`
+}
+
+type DockerLifecycle struct {
+	Image   string   `json:"image"`
+	Command []string `json:"command"`
+}
+
+type BuildpackLifecycle struct {
+	DropletHash  string `json:"droplet_hash"`
+	DropletGUID  string `json:"droplet_guid"`
+	StartCommand string `json:"start_command"`
+}
+
+type VolumeMount struct {
+	VolumeID string `json:"volume_id"`
+	MountDir string `json:"mount_dir"`
 }
 
 type LRPStatus struct {
-	AvailableReplicas int32 `json:"availableReplicas"`
+	AvailableReplicas int32  `json:"availableReplicas"`
+	State             string `json:"state,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
