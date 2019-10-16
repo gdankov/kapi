@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lrp-controller
+  labels:
+    name: lrp-controller
+  namespace: kapini
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: lrp-controller
+  template:
+    metadata:
+      labels:
+        name: lrp-controller
+    spec:
+      serviceAccountName: kapi-eirini-admin
+      volumes:
+      - name: cf-secrets
+        secret:
+          secretName: secrets-2.16.4-2
+          items:
+          - key: eirini-client-crt
+            path: eirini.crt
+          - key: eirini-client-crt-key
+            path: eirini.key
+          - key: internal-ca-cert
+            path: ca.crt
+      containers:
+      - name: hello-my-dudes
+        image: eirini/kapi-lrp-controller
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: cf-secrets
+          mountPath: /workspace/jobs/lrp_controller

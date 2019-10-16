@@ -1,15 +1,24 @@
 package lrp
 
 import (
+	"bytes"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"path/filepath"
 	"time"
 
+	kapiv1alpha1 "github.com/cloudfoundry-community/kapi/pkg/apis/kapi/v1alpha1"
 	clientset "github.com/cloudfoundry-community/kapi/pkg/generated/clientset/versioned"
 	samplescheme "github.com/cloudfoundry-community/kapi/pkg/generated/clientset/versioned/scheme"
 	informers "github.com/cloudfoundry-community/kapi/pkg/generated/informers/externalversions/kapi/v1alpha1"
 	listers "github.com/cloudfoundry-community/kapi/pkg/generated/listers/kapi/v1alpha1"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -162,17 +171,88 @@ func (c *LRPController) syncHandler(key string) error {
 		return nil
 	}
 
-	staging, err := c.lrpsLister.LRPs(namespace).Get(name)
+	lrp, err := c.lrpsLister.LRPs(namespace).Get(name)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", key))
 			return nil
 		}
-
 		return err
 	}
 
-	fmt.Printf("Found obj: %+v\n", staging)
+	if lrp.Spec.State != kapiv1alpha1.NotStartedState {
+		fmt.Println("LRP already started")
+		return nil
+	}
 
-	return nil
+	spec := lrp.Spec
+	b, err := json.Marshal(spec)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal spec")
+	}
+
+	url := fmt.Sprintf("https://eirini-opi.scf.svc.cluster.local:8085/apps/%s", spec.ProcessGUID)
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(b))
+	if err != nil {
+		return errors.Wrap(err, "failed to create the post request")
+	}
+
+	client, err := createTLSHTTPClient(
+		[]CertPaths{
+			{
+				Crt: "/workspace/jobs/lrp_controller/eirini.crt",
+				Key: "/workspace/jobs/lrp_controller/eirini.key",
+				Ca:  "/workspace/jobs/lrp_controller/ca.crt",
+			},
+		},
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to create https client")
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to execute the post request")
+	}
+	fmt.Printf("WE GOT A RESPONSE: %+v", resp)
+
+	lrp.Spec.State = kapiv1alpha1.StartedState
+
+	_, err = c.kapiClientset.SamplecontrollerV1alpha1().LRPs(namespace).Update(lrp)
+	if err != nil {
+		fmt.Println("Failed to update status", err)
+	}
+
+	return err
+}
+
+type CertPaths struct {
+	Crt, Key, Ca string
+}
+
+func createTLSHTTPClient(certPaths []CertPaths) (*http.Client, error) {
+	pool := x509.NewCertPool()
+	certs := []tls.Certificate{}
+	for _, c := range certPaths {
+		cert, err := tls.LoadX509KeyPair(c.Crt, c.Key)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not load cert")
+		}
+		certs = append(certs, cert)
+
+		cacert, err := ioutil.ReadFile(filepath.Clean(c.Ca))
+		if err != nil {
+			return nil, err
+		}
+		if ok := pool.AppendCertsFromPEM(cacert); !ok {
+			return nil, errors.New("failed to append cert to cert pool")
+		}
+	}
+
+	tlsConf := &tls.Config{
+		Certificates: certs,
+		RootCAs:      pool,
+	}
+
+	return &http.Client{Transport: &http.Transport{TLSClientConfig: tlsConf}}, nil
 }
