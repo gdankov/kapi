@@ -40,7 +40,6 @@ type StagerController struct {
 	recorder  record.EventRecorder
 }
 
-// NewController returns a new sample controller
 func NewController(
 	kapiclientset clientset.Interface,
 	stagerInformer informers.StagingInformer) *StagerController {
@@ -69,22 +68,12 @@ func NewController(
 	return controller
 }
 
-func (c *StagerController) enqueueFoo(obj interface{}) {
-	var key string
-	var err error
-	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
-		utilruntime.HandleError(err)
-		return
-	}
-	c.workqueue.Add(key)
-}
-
 func (c *StagerController) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches
-	klog.Info("Starting Foo controller")
+	klog.Info("Starting staging controller")
 
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
@@ -93,8 +82,9 @@ func (c *StagerController) Run(threadiness int, stopCh <-chan struct{}) error {
 	}
 
 	klog.Info("Starting workers")
-	// Launch two workers to process Foo resources
-	go wait.Until(c.runWorker, time.Second, stopCh)
+	for i := 0; i < threadiness; i++ {
+		go wait.Until(c.runWorker, time.Second, stopCh)
+	}
 
 	klog.Info("Started workers")
 	<-stopCh
@@ -108,9 +98,20 @@ func (c *StagerController) runWorker() {
 	}
 }
 
+func (c *StagerController) enqueueFoo(obj interface{}) {
+	var key string
+	var err error
+	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
+		utilruntime.HandleError(err)
+		return
+	}
+	c.workqueue.Add(key)
+}
+
 // processNextWorkItem will read a single work item off the workqueue and
 // attempt to process it, by calling the syncHandler.
 func (c *StagerController) processNextWorkItem() bool {
+	// obj should be key
 	obj, shutdown := c.workqueue.Get()
 
 	if shutdown {
@@ -142,7 +143,6 @@ func (c *StagerController) processNextWorkItem() bool {
 			return nil
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
-		// Foo resource to be synced.
 		if err := c.syncHandler(key); err != nil {
 			// Put the item back on the workqueue to handle any transient errors.
 			c.workqueue.AddRateLimited(key)
@@ -163,6 +163,7 @@ func (c *StagerController) processNextWorkItem() bool {
 	return true
 }
 
+// the business logic
 func (c *StagerController) syncHandler(key string) error {
 	// Convert the namespace/name string into a distinct namespace and name
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)

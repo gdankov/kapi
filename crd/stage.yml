@@ -11,6 +11,6 @@ spec:
     singular: staging
     kind: Staging
     shortNames:
-    - cfs
+    - stg
   subresources:
     status: {}

@@ -1,6 +1,6 @@
 module github.com/cloudfoundry-community/kapi
 
-go 1.12
+go 1.13
 
 require (
 	code.cloudfoundry.org/eirini v0.0.0-20191003133837-d1f227bf250a
