@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staging-controller
+  labels:
+    name: staging-controller
+  namespace: kapini
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: staging-controller
+  template:
+    metadata:
+      labels:
+        name: staging-controller
+    spec:
+      serviceAccountName: kapi-eirini-admin
+      volumes:
+      - name: cf-secrets
+        secret:
+          secretName: secrets-2.16.4-2
+          items:
+          - key: eirini-client-crt
+            path: eirini.crt
+          - key: eirini-client-crt-key
+            path: eirini.key
+          - key: internal-ca-cert
+            path: ca.crt
+      containers:
+      - name: controller
+        image: gdankov/staging-controller
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: cf-secrets
+          mountPath: /workspace/jobs/staging-controller
+        env:
+        - name: EIRINI_CRT_PATH
+          value: /workspace/jobs/staging-controller/eirini.crt
+        - name: EIRINI_KEY_PATH
+          value: /workspace/jobs/staging-controller/eirini.key
+        - name: EIRINI_CA_PATH
+          value: /workspace/jobs/staging-controller/ca.crt
+        - name: EIRINI_URL
+          value: https://eirini-opi.scf.svc.cluster.local:8085
